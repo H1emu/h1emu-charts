@@ -10,11 +10,13 @@ import (
 )
 
 const (
-	MONGO_DEFAULT_URL           = "mongodb://localhost:27017"
-	DATABASE_NAME               = "h1server"
-	KILLS_COLLECTION_NAME       = "kills"
-	CONNECTIONS_COLLECTION_NAME = "connections"
-	SERVERS_COLLECTION_NAME     = "servers"
+	MONGO_DEFAULT_URL             = "mongodb://localhost:27017"
+	DATABASE_NAME                 = "h1server"
+	KILLS_COLLECTION_NAME         = "kills"
+	CONNECTIONS_COLLECTION_NAME   = "connections"
+	CONSTRUCTIONS_COLLECTION_NAME = "construction"
+	CROPS_COLLECTION_NAME         = "crops"
+	SERVERS_COLLECTION_NAME       = "servers"
 )
 
 func getMongoCtx() (context.Context, context.CancelFunc) {
@@ -35,6 +37,20 @@ func getDb(mongoCtx context.Context) *mongo.Database {
 	return mongoClient.Database(DATABASE_NAME)
 }
 
+func getTopKiller(db *mongo.Database, mongoCtx context.Context, serverId uint32, entityType string) []TopKiller {
+	coll := db.Collection(KILLS_COLLECTION_NAME)
+	pipeline := getTopKillerPipeline(serverId, entityType, 10)
+	cursor, error := coll.Aggregate(mongoCtx, pipeline)
+
+	if error != nil {
+		panic(error)
+	}
+	defer cursor.Close(mongoCtx)
+	var result []TopKiller
+	cursor.All(mongoCtx, &result)
+	return result
+}
+
 func getCountPerServer(db *mongo.Database, mongoCtx context.Context, serverId uint32, collectionName string) uint32 {
 	coll := db.Collection(collectionName)
 	pipeline := getCountPerServerPipeline(serverId)
@@ -46,6 +62,9 @@ func getCountPerServer(db *mongo.Database, mongoCtx context.Context, serverId ui
 	defer cursor.Close(mongoCtx)
 	var result []CountPerServerResult
 	cursor.All(mongoCtx, &result)
+	if len(result) < 1 {
+		return 0
+	}
 	return result[0].Count
 }
 

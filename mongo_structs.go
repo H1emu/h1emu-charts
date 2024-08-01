@@ -16,6 +16,11 @@ type ConnectionsPerMonth struct {
 	Count uint32 `bson:"count" json:"count"`
 }
 
+type TopKiller struct {
+	CharacterName string `bson:"characterName"`
+	Count         uint32 `bson:"count"`
+}
+
 type Server struct {
 	ID               primitive.ObjectID `bson:"_id" json:"_id"`
 	Locked           bool               `bson:"locked" json:"locked"`

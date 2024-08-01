@@ -14,6 +14,26 @@ func getCountPerServerPipeline(serverId uint32) mongo.Pipeline {
 	return pipeline
 }
 
+func getTopKillerPipeline(serverId uint32, entityType string, maxResult uint8) mongo.Pipeline {
+	pipeline := mongo.Pipeline{
+		{{"$match", bson.D{{"serverId", serverId}}}},
+		{{"$match", bson.D{{"type", entityType}}}},
+		{{"$group", bson.D{
+			{"_id", "$characterName"},
+			{"count", bson.D{{"$sum", 1}}},
+		}}},
+		{{"$sort", bson.D{{"count", -1}}}},
+		{{"$limit", maxResult}},
+		{{"$project", bson.D{
+			{"_id", 0},
+			{"characterName", "$_id"},
+			{"count", 1},
+		}}},
+	}
+
+	return pipeline
+}
+
 func getConnectionsPerServerPipeline(serverId uint32) mongo.Pipeline {
 	pipeline := mongo.Pipeline{
 		{{"$match", bson.D{{"serverId", serverId}}}},
