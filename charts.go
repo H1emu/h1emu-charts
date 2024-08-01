@@ -53,3 +53,21 @@ func createConnectionsChart(allConnections []ConnectionsPerMonth, connectionData
 	f, _ := os.Create("bar.html")
 	bar.Render(f)
 }
+
+func createTop10KillerChart(topKiller []TopKiller) {
+	// create a new bar instance
+	bar := charts.NewBar()
+
+	// dataLen := len(topKiller)
+	items := make([]opts.BarData, 0)
+	xAxis := make([]string, 0)
+	for _, killer := range topKiller {
+		xAxis = append(xAxis, killer.CharacterName)
+		items = append(items, opts.BarData{Value: killer.Count})
+	}
+	bar.SetXAxis(xAxis)
+	bar.AddSeries("Killer", items)
+	// Where the magic happens
+	f, _ := os.Create("killer.html")
+	bar.Render(f)
+}

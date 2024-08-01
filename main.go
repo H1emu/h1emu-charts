@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 type ConnectionData struct {
 	name string
 	data []ConnectionsPerMonth
@@ -12,10 +10,7 @@ func main() {
 	defer mongoCancel()
 	db := getDb(mongoCtx)
 	top := getTopKiller(db, mongoCtx, 12, "player")
-	fmt.Println("Top 10 Killers:")
-	for _, killer := range top {
-		fmt.Printf("Player: %s, Count: %d\n", killer.CharacterName, killer.Count)
-	}
+	createTop10KillerChart(top)
 	// servers := getServers(db, mongoCtx)
 	// connectionsDatas := make([]ConnectionData, len(servers))
 	// allConnections := getAllConnections(db, mongoCtx)
