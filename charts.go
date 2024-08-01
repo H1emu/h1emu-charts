@@ -54,9 +54,12 @@ func createConnectionsChart(allConnections []ConnectionsPerMonth, connectionData
 	bar.Render(f)
 }
 
-func createTop10KillerChart(topKiller []TopKiller) {
+func createTop10KillerChart(chartName string, topKiller []TopKiller) {
 	// create a new bar instance
 	bar := charts.NewBar()
+	bar.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
+		Title: chartName,
+	}))
 
 	// dataLen := len(topKiller)
 	items := make([]opts.BarData, 0)
@@ -68,6 +71,6 @@ func createTop10KillerChart(topKiller []TopKiller) {
 	bar.SetXAxis(xAxis)
 	bar.AddSeries("Killer", items)
 	// Where the magic happens
-	f, _ := os.Create("killer.html")
+	f, _ := os.Create(chartName + ".html")
 	bar.Render(f)
 }
