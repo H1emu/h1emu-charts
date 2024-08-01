@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"os"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/go-echarts/go-echarts/v2/opts"
 )
@@ -50,7 +52,7 @@ func createConnectionsChart(allConnections []ConnectionsPerMonth, connectionData
 		bar.AddSeries(cd.name, generateLineItems(data))
 	}
 	// Where the magic happens
-	f, _ := os.Create("bar.html")
+	f, _ := os.Create("public/connections.html")
 	bar.Render(f)
 }
 
@@ -71,6 +73,31 @@ func createTop10KillerChart(chartName string, topKiller []TopKiller) {
 	bar.SetXAxis(xAxis)
 	bar.AddSeries("Killer", items)
 	// Where the magic happens
-	f, _ := os.Create(chartName + ".html")
+	f, error := os.Create("public/" + chartName + ".html")
+	if error != nil {
+		panic(error)
+	}
 	bar.Render(f)
+}
+
+func genCharts(db *mongo.Database, mongoCtx context.Context) {
+	top := getTopKiller(db, mongoCtx, 12, "player")
+	createTop10KillerChart("Top Killer Main EU 1", top)
+	top = getTopKiller(db, mongoCtx, 11, "player")
+	createTop10KillerChart("Top Killer Main US 1", top)
+	top = getTopKiller(db, mongoCtx, 61, "zombie")
+	createTop10KillerChart("Top Zombie Killer Help", top)
+	servers := getServers(db, mongoCtx)
+	connectionsDatas := make([]ConnectionData, len(servers))
+	allConnections := getAllConnections(db, mongoCtx)
+	for _, v := range servers {
+		println("doing serverid :", v.ServerId)
+		data := getConnectionsToServer(db, mongoCtx, v.ServerId)
+		println(len(data))
+		if len(data) == 0 {
+			continue
+		}
+		connectionsDatas = append(connectionsDatas, ConnectionData{name: v.Name, data: data})
+	}
+	createConnectionsChart(allConnections, connectionsDatas)
 }
