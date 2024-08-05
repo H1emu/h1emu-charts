@@ -1,7 +1,6 @@
 package main
 
 import (
-	"net/http"
 	"os"
 )
 
@@ -17,10 +16,5 @@ func main() {
 	os.Mkdir("public", 0755)
 	genCharts(db, mongoCtx)
 	genHtml()
-	// http.HandleFunc("/static", handler)
-	fs := http.FileServer(http.Dir("public"))
-
-	// Handle all requests by serving files from the "public" directory
-	http.Handle("/", fs)
-	http.ListenAndServe(":8080", nil)
+	serveHtml()
 }
