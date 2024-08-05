@@ -41,19 +41,23 @@ func populateMissingConnectionsData(all []ConnectionsPerMonth, current []Connect
 }
 
 func createConnectionsChart(allConnections []ConnectionsPerMonth, connectionDatas []ConnectionData) {
-	// create a new bar instance
-	bar := charts.NewLine()
+	// create a new line instance
+	line := charts.NewLine()
 
 	// Put data into instance
-	bar.SetXAxis(getXaxis(allConnections))
-	bar.AddSeries("all", generateLineItems(allConnections))
+	line.SetXAxis(getXaxis(allConnections))
+	line.AddSeries("all", generateLineItems(allConnections))
+	selected := make(map[string]bool)
 	for _, cd := range connectionDatas {
 		data := populateMissingConnectionsData(allConnections, cd.data)
-		bar.AddSeries(cd.name, generateLineItems(data))
+		line.AddSeries(cd.name, generateLineItems(data))
+		selected[cd.name] = false
 	}
-	// Where the magic happens
+	line.SetGlobalOptions(charts.WithLegendOpts(opts.Legend{
+		Selected: selected,
+	}))
 	f, _ := os.Create("public/connections.html")
-	bar.Render(f)
+	line.Render(f)
 }
 
 func createTop10KillerChart(chartName string, topKiller []TopKiller) {
