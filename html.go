@@ -17,7 +17,6 @@ const tmpl = `
   <iframe src="./connections.html" width="100%" height="600px" frameborder="0">
         Your browser does not support iframes.
     </iframe>
-  <h1> fais des template reutilisable par serveur</h1>
   <iframe src="./Top Killer Main EU 1.html" width="100%" height="600px" frameborder="0">
         Your browser does not support iframes.
     </iframe>
@@ -29,14 +28,19 @@ const tmpl = `
     </iframe>
   
     {{.Connections}}
+
+  <script> setTimeout(()=>location.reload(),{{.RefreshTimeMs}})</script>
 </body>
 </html>
 `
 
 func genHtml() {
 	data := struct {
-		Connections string
-	}{}
+		Connections   string
+		RefreshTimeMs uint32
+	}{
+		RefreshTimeMs: REFRESH_TIME*1000 + 60000,
+	}
 
 	// Create a new template and parse the defined HTML
 	t := template.Must(template.New("staticPage").Parse(tmpl))
