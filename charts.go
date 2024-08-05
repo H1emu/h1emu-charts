@@ -63,7 +63,6 @@ func createTop10KillerChart(chartName string, topKiller []TopKiller) {
 		Title: chartName,
 	}))
 
-	// dataLen := len(topKiller)
 	items := make([]opts.BarData, 0)
 	xAxis := make([]string, 0)
 	for _, killer := range topKiller {
