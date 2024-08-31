@@ -26,6 +26,7 @@ type Server struct {
 	Locked           bool               `bson:"locked" json:"locked"`
 	AllowedAccess    bool               `bson:"allowedAccess" json:"allowedAccess"`
 	IsOfficial       bool               `bson:IsOfficial json:"IsOfficial"`
+	IsDisabled       bool               `bson:isDisabled json:"isDisabled"`
 	ServerId         uint32             `bson:"serverId" json:"serverId"`
 	ServerAddress    string             `bson:"serverAddress" json:"serverAddress"`
 	Name             string             `bson:"name" json:"name"`

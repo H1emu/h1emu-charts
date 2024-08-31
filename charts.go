@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
@@ -83,14 +84,45 @@ func createTop10KillerChart(chartName string, topKiller []TopKiller) {
 	bar.Render(f)
 }
 
+func createCountPerServerCharts(db *mongo.Database, mongoCtx context.Context, serverList []Server, collectionName string, chartName string) {
+	bar := charts.NewBar()
+	bar.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
+		Title: chartName,
+	}))
+	items := make([]opts.BarData, 0)
+	xAxis := make([]string, 0)
+	for i := 0; i < len(serverList); i++ {
+		v := serverList[i]
+		xAxis = append(xAxis, fmt.Sprintf("%s (%s)", v.Name, v.Region))
+		count := getCountPerServer(db, mongoCtx, v.ServerId, collectionName)
+		items = append(items, opts.BarData{Value: count})
+
+	}
+	bar.SetXAxis(xAxis)
+	bar.AddSeries(collectionName, items)
+	f, error := os.Create("public/" + chartName + ".html")
+	if error != nil {
+		panic(error)
+	}
+	bar.Render(f)
+}
+
 func genCharts(db *mongo.Database, mongoCtx context.Context) {
+	servers := getServers(db, mongoCtx)
+	officialServers := []Server{}
+	for _, v := range servers {
+		if v.IsOfficial && !v.IsDisabled {
+			officialServers = append(officialServers, v)
+		}
+	}
+	createCountPerServerCharts(db, mongoCtx, officialServers, CONSTRUCTIONS_COLLECTION_NAME, "Constructions per server")
+	createCountPerServerCharts(db, mongoCtx, officialServers, CROPS_COLLECTION_NAME, "Crops per server")
 	top := getTopKiller(db, mongoCtx, 12, "player")
 	createTop10KillerChart("Top Killer Main EU 1", top)
 	top = getTopKiller(db, mongoCtx, 11, "player")
 	createTop10KillerChart("Top Killer Main US 1", top)
 	top = getTopKiller(db, mongoCtx, 61, "zombie")
 	createTop10KillerChart("Top Zombie Killer Help", top)
-	servers := getServers(db, mongoCtx)
 	connectionsDatas := make([]ConnectionData, len(servers))
 	allConnections := getAllConnections(db, mongoCtx)
 	for _, v := range servers {
