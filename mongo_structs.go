@@ -37,3 +37,8 @@ type Server struct {
 	H1emuVersion     string             `bson:"h1emuVersion" json:"h1emuVersion"`
 	GameVersion      uint32             `bson:"gameVersion" json:"gameVersion"`
 }
+
+type Character struct {
+	ServerId uint32 `bson:"serverId" json:"serverId"`
+	PlayTime uint32 `bson:"playTime" json:"playTime"`
+}

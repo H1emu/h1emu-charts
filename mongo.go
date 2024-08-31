@@ -15,6 +15,7 @@ const (
 	KILLS_COLLECTION_NAME         = "kills"
 	CONNECTIONS_COLLECTION_NAME   = "connections"
 	CONSTRUCTIONS_COLLECTION_NAME = "construction"
+	CHARACTERS_COLLECTION_NAME    = "characters"
 	CROPS_COLLECTION_NAME         = "crops"
 	SERVERS_COLLECTION_NAME       = "servers"
 )
@@ -75,6 +76,17 @@ func getServers(db *mongo.Database, mongoCtx context.Context) []Server {
 		panic(error)
 	}
 	var results []Server
+	cursor.All(mongoCtx, &results)
+	return results
+}
+
+func getCharacters(db *mongo.Database, mongoCtx context.Context, serverId uint32) []Character {
+	serversCollection := db.Collection(SERVERS_COLLECTION_NAME)
+	cursor, error := serversCollection.Find(mongoCtx, bson.M{"serverId": serverId})
+	if error != nil {
+		panic(error)
+	}
+	var results []Character
 	cursor.All(mongoCtx, &results)
 	return results
 }

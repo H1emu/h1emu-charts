@@ -107,6 +107,31 @@ func createCountPerServerCharts(db *mongo.Database, mongoCtx context.Context, se
 	bar.Render(f)
 }
 
+func createPlayTimePerServer(db *mongo.Database, mongoCtx context.Context, serverList []Server) {
+	bar := charts.NewBar()
+	bar.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
+		Title: "PlayTime per server",
+	}))
+	items := make([]opts.BarData, 0)
+	xAxis := make([]string, 0)
+	total := 0
+	for _, v := range serverList {
+		chars := getCharacters(db, mongoCtx, v.ServerId)
+		xAxis = append(xAxis, fmt.Sprintf("%s (%s)", v.Name, v.Region))
+		for _, v := range chars {
+			total += int(v.PlayTime)
+		}
+		items = append(items, opts.BarData{Value: total})
+	}
+	bar.SetXAxis(xAxis)
+	bar.AddSeries("Time in minutes", items)
+	f, error := os.Create("public/" + "playtime" + ".html")
+	if error != nil {
+		panic(error)
+	}
+	bar.Render(f)
+}
+
 func genCharts(db *mongo.Database, mongoCtx context.Context) {
 	servers := getServers(db, mongoCtx)
 	officialServers := []Server{}
@@ -115,6 +140,8 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 			officialServers = append(officialServers, v)
 		}
 	}
+	createPlayTimePerServer(db, mongoCtx, officialServers)
+	createCountPerServerCharts(db, mongoCtx, officialServers, CHARACTERS_COLLECTION_NAME, "Characters per server")
 	createCountPerServerCharts(db, mongoCtx, officialServers, CONSTRUCTIONS_COLLECTION_NAME, "Constructions per server")
 	createCountPerServerCharts(db, mongoCtx, officialServers, CROPS_COLLECTION_NAME, "Crops per server")
 	top := getTopKiller(db, mongoCtx, 12, "player")
