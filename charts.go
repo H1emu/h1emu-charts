@@ -41,13 +41,19 @@ func populateMissingConnectionsData(all []ConnectionsPerMonth, current []Connect
 	return result
 }
 
-func createConnectionsChart(allConnections []ConnectionsPerMonth, connectionDatas []ConnectionData) {
+func createConnectionsChart(name string, allConnections []ConnectionsPerMonth, connectionDatas []ConnectionData) {
 	// create a new line instance
 	line := charts.NewLine()
+	line.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
+		Title: name,
+	}))
 
 	// Put data into instance
-	line.SetXAxis(getXaxis(allConnections))
-	line.AddSeries("all", generateLineItems(allConnections))
+	if len(allConnections) > 0 {
+
+		line.SetXAxis(getXaxis(allConnections))
+		line.AddSeries("all", generateLineItems(allConnections))
+	}
 	selected := make(map[string]bool)
 	for _, cd := range connectionDatas {
 		data := populateMissingConnectionsData(allConnections, cd.data)
@@ -57,7 +63,7 @@ func createConnectionsChart(allConnections []ConnectionsPerMonth, connectionData
 	line.SetGlobalOptions(charts.WithLegendOpts(opts.Legend{
 		Selected: selected,
 	}))
-	f, _ := os.Create("public/connections.html")
+	f, _ := os.Create("public/" + name + ".html")
 	line.Render(f)
 }
 
@@ -135,9 +141,13 @@ func createPlayTimePerServer(db *mongo.Database, mongoCtx context.Context, serve
 func genCharts(db *mongo.Database, mongoCtx context.Context) {
 	servers := getServers(db, mongoCtx)
 	officialServers := []Server{}
+	enabledServers := []Server{}
 	for _, v := range servers {
 		if v.IsOfficial && !v.IsDisabled {
 			officialServers = append(officialServers, v)
+		}
+		if !v.IsDisabled {
+			enabledServers = append(enabledServers, v)
 		}
 	}
 	createPlayTimePerServer(db, mongoCtx, officialServers)
@@ -152,14 +162,26 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 	createTop10KillerChart("Top Zombie Killer Help", top)
 	connectionsDatas := make([]ConnectionData, len(servers))
 	allConnections := getAllConnections(db, mongoCtx)
-	for _, v := range servers {
+	for _, v := range enabledServers {
 		println("doing serverid :", v.ServerId)
 		data := getConnectionsToServer(db, mongoCtx, v.ServerId)
 		println(len(data))
 		if len(data) == 0 {
 			continue
 		}
-		connectionsDatas = append(connectionsDatas, ConnectionData{name: v.Name, data: data})
+		connectionsDatas = append(connectionsDatas, ConnectionData{name: v.Name + " " + v.Region, data: data})
 	}
-	createConnectionsChart(allConnections, connectionsDatas)
+	createConnectionsChart("connections", allConnections, connectionsDatas)
+	lastMonthConnectionsDatas := make([]ConnectionData, len(servers))
+	for _, v := range officialServers {
+		println("doing serverid :", v.ServerId)
+		data := getConnectionsLastMonthToServer(db, mongoCtx, v.ServerId)
+		println(len(data))
+		if len(data) == 0 {
+			continue
+		}
+		lastMonthConnectionsDatas = append(lastMonthConnectionsDatas, ConnectionData{name: v.Name + " " + v.Region, data: data})
+	}
+	// this is shitty
+	createConnectionsChart("connections_officials", make([]ConnectionsPerMonth, 0), connectionsDatas)
 }

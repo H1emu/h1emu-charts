@@ -103,9 +103,33 @@ func getConnectionsToServer(db *mongo.Database, mongoCtx context.Context, server
 	return results
 }
 
+func getConnectionsLastMonthToServer(db *mongo.Database, mongoCtx context.Context, serverId uint32) []ConnectionsPerMonth {
+	ConnectionsCollection := db.Collection(CONNECTIONS_COLLECTION_NAME)
+	pipeline := getConnectionsLastMonthPerServerPipeline(serverId)
+	cursor, error := ConnectionsCollection.Aggregate(mongoCtx, pipeline)
+	if error != nil {
+		panic(error)
+	}
+	var results []ConnectionsPerMonth
+	cursor.All(mongoCtx, &results)
+	return results
+}
+
 func getAllConnections(db *mongo.Database, mongoCtx context.Context) []ConnectionsPerMonth {
 	ConnectionsCollection := db.Collection(CONNECTIONS_COLLECTION_NAME)
 	pipeline := getAllConnectionsPipeline()
+	cursor, error := ConnectionsCollection.Aggregate(mongoCtx, pipeline)
+	if error != nil {
+		panic(error)
+	}
+	var results []ConnectionsPerMonth
+	cursor.All(mongoCtx, &results)
+	return results
+}
+
+func getAllConnectionsLastMonth(db *mongo.Database, mongoCtx context.Context) []ConnectionsPerMonth {
+	ConnectionsCollection := db.Collection(CONNECTIONS_COLLECTION_NAME)
+	pipeline := getAllConnectionsLastMonthPipeline()
 	cursor, error := ConnectionsCollection.Aggregate(mongoCtx, pipeline)
 	if error != nil {
 		panic(error)
