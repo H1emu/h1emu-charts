@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	SERVER_DEFAULT_ADDR = ":8080"
+	SERVER_DEFAULT_ADDR = ":8082"
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
