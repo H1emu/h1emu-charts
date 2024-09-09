@@ -16,6 +16,7 @@ func main() {
 	mongoCtx, mongoCancel := getMongoCtx()
 	defer mongoCancel()
 	db := getDb(mongoCtx)
+	// rm everything at each reload
 	os.RemoveAll("public")
 	os.Mkdir("public", 0755)
 	go serveHtml()
