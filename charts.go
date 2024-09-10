@@ -29,11 +29,12 @@ func getXaxis(ConnectionDatas []ConnectionsPerMonth) []string {
 	return xais
 }
 
+// Since servers were not all created a the same time
 func populateMissingConnectionsData(all []ConnectionsPerMonth, current []ConnectionsPerMonth) []ConnectionsPerMonth {
 	result := make([]ConnectionsPerMonth, len(all))
 	for i := 0; i < len(result); i++ {
 		for ry := 0; ry < len(current); ry++ {
-			if current[ry].Id == all[i].Id && current[ry].Count > 10000 {
+			if current[ry].Id == all[i].Id {
 				result[i] = current[ry]
 			}
 		}
@@ -45,21 +46,20 @@ func populateMissingConnectionsData(all []ConnectionsPerMonth, current []Connect
 func createConnectionsChart(name string, allConnections []ConnectionsPerMonth, connectionDatas []ConnectionData) {
 	// create a new line instance
 	line := charts.NewLine()
-	line.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
-		Title: name,
-	}))
+	// line.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
+	// 	Title: name,
+	// }))
 
 	// Put data into instance
-	if len(allConnections) > 0 {
-
-		line.SetXAxis(getXaxis(allConnections))
-		line.AddSeries("all", generateLineItems(allConnections))
-	}
+	line.SetXAxis(getXaxis(allConnections))
+	line.AddSeries("All", generateLineItems(allConnections))
 	selected := make(map[string]bool)
+	// disable "all" line per default
+	selected["All"] = false
 	for _, cd := range connectionDatas {
 		data := populateMissingConnectionsData(allConnections, cd.data)
 		line.AddSeries(cd.name, generateLineItems(data))
-		selected[cd.name] = false
+		selected[cd.name] = true
 	}
 	line.SetGlobalOptions(charts.WithLegendOpts(opts.Legend{
 		Selected: selected,
@@ -117,7 +117,7 @@ func createCountPerServerCharts(db *mongo.Database, mongoCtx context.Context, se
 func createPlayTimePerServer(db *mongo.Database, mongoCtx context.Context, serverList []Server) {
 	bar := charts.NewBar()
 	bar.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
-		Title: "PlayTime per server",
+		Title: "PlayTime per server this wipe",
 	}))
 	items := make([]opts.BarData, 0)
 	xAxis := make([]string, 0)
@@ -161,7 +161,7 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 	createTop10KillerChart("Top Killer Main US 1", top)
 	top = getTopKiller(db, mongoCtx, 61, "zombie")
 	createTop10KillerChart("Top Zombie Killer Help", top)
-	connectionsDatas := make([]ConnectionData, len(servers))
+	connectionsDatas := make([]ConnectionData, 0)
 	allConnections := getAllConnections(db, mongoCtx)
 	for _, v := range enabledServers {
 		data := getConnectionsToServer(db, mongoCtx, v.ServerId)
@@ -171,7 +171,8 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 		connectionsDatas = append(connectionsDatas, ConnectionData{name: v.Name + " " + v.Region, data: data})
 	}
 	createConnectionsChart("connections", allConnections, connectionsDatas)
-	lastMonthConnectionsDatas := make([]ConnectionData, len(servers))
+	lastMonthConnectionsDatas := make([]ConnectionData, 0)
+	allConnectionsLastMonth := getAllConnectionsLastMonth(db, mongoCtx)
 	for _, v := range officialServers {
 		data := getConnectionsLastMonthToServer(db, mongoCtx, v.ServerId)
 		if len(data) == 0 {
@@ -179,6 +180,5 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 		}
 		lastMonthConnectionsDatas = append(lastMonthConnectionsDatas, ConnectionData{name: v.Name + " " + v.Region, data: data})
 	}
-	// this is shitty
-	createConnectionsChart("connections_officials", make([]ConnectionsPerMonth, 0), connectionsDatas)
+	createConnectionsChart("connections_officials", allConnectionsLastMonth, lastMonthConnectionsDatas)
 }
