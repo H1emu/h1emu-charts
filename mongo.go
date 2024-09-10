@@ -81,8 +81,8 @@ func getServers(db *mongo.Database, mongoCtx context.Context) []Server {
 }
 
 func getCharacters(db *mongo.Database, mongoCtx context.Context, serverId uint32) []Character {
-	serversCollection := db.Collection(SERVERS_COLLECTION_NAME)
-	cursor, error := serversCollection.Find(mongoCtx, bson.M{"serverId": serverId})
+	charactersCollection := db.Collection(CHARACTERS_COLLECTION_NAME)
+	cursor, error := charactersCollection.Find(mongoCtx, bson.M{"serverId": serverId})
 	if error != nil {
 		panic(error)
 	}

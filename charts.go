@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"math"
 	"os"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
@@ -127,10 +128,10 @@ func createPlayTimePerServer(db *mongo.Database, mongoCtx context.Context, serve
 		for _, v := range chars {
 			total += int(v.PlayTime)
 		}
-		items = append(items, opts.BarData{Value: total})
+		items = append(items, opts.BarData{Value: math.Floor(float64(total) / 60.0)})
 	}
 	bar.SetXAxis(xAxis)
-	bar.AddSeries("Time in minutes", items)
+	bar.AddSeries("Cumulative time in hours", items)
 	f, error := os.Create("public/" + "playtime" + ".html")
 	if error != nil {
 		panic(error)
@@ -163,9 +164,7 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 	connectionsDatas := make([]ConnectionData, len(servers))
 	allConnections := getAllConnections(db, mongoCtx)
 	for _, v := range enabledServers {
-		println("doing serverid :", v.ServerId)
 		data := getConnectionsToServer(db, mongoCtx, v.ServerId)
-		println(len(data))
 		if len(data) == 0 {
 			continue
 		}
@@ -174,9 +173,7 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 	createConnectionsChart("connections", allConnections, connectionsDatas)
 	lastMonthConnectionsDatas := make([]ConnectionData, len(servers))
 	for _, v := range officialServers {
-		println("doing serverid :", v.ServerId)
 		data := getConnectionsLastMonthToServer(db, mongoCtx, v.ServerId)
-		println(len(data))
 		if len(data) == 0 {
 			continue
 		}
