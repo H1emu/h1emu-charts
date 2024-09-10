@@ -46,9 +46,9 @@ func populateMissingConnectionsData(all []ConnectionsPerMonth, current []Connect
 func createConnectionsChart(name string, allConnections []ConnectionsPerMonth, connectionDatas []ConnectionData) {
 	// create a new line instance
 	line := charts.NewLine()
-	// line.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
-	// 	Title: name,
-	// }))
+	line.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
+		Title: name,
+	}))
 
 	// Put data into instance
 	line.SetXAxis(getXaxis(allConnections))
@@ -63,6 +63,7 @@ func createConnectionsChart(name string, allConnections []ConnectionsPerMonth, c
 	}
 	line.SetGlobalOptions(charts.WithLegendOpts(opts.Legend{
 		Selected: selected,
+		Show:     opts.Bool(false),
 	}))
 	f, _ := os.Create("public/" + name + ".html")
 	line.Render(f)
@@ -74,6 +75,9 @@ func createTop10KillerChart(chartName string, topKiller []TopKiller) {
 	bar.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
 		Title: chartName,
 	}))
+	bar.SetGlobalOptions(charts.WithLegendOpts(opts.Legend{
+		Show: opts.Bool(false),
+	}))
 
 	items := make([]opts.BarData, 0)
 	xAxis := make([]string, 0)
@@ -82,7 +86,7 @@ func createTop10KillerChart(chartName string, topKiller []TopKiller) {
 		items = append(items, opts.BarData{Value: killer.Count})
 	}
 	bar.SetXAxis(xAxis)
-	bar.AddSeries("Killer", items)
+	bar.AddSeries("Kills", items)
 	// Where the magic happens
 	f, error := os.Create("public/" + chartName + ".html")
 	if error != nil {
@@ -95,6 +99,9 @@ func createCountPerServerCharts(db *mongo.Database, mongoCtx context.Context, se
 	bar := charts.NewBar()
 	bar.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
 		Title: chartName,
+	}))
+	bar.SetGlobalOptions(charts.WithLegendOpts(opts.Legend{
+		Show: opts.Bool(false),
 	}))
 	items := make([]opts.BarData, 0)
 	xAxis := make([]string, 0)
@@ -118,6 +125,9 @@ func createPlayTimePerServer(db *mongo.Database, mongoCtx context.Context, serve
 	bar := charts.NewBar()
 	bar.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
 		Title: "PlayTime per server this wipe",
+	}))
+	bar.SetGlobalOptions(charts.WithLegendOpts(opts.Legend{
+		Show: opts.Bool(false),
 	}))
 	items := make([]opts.BarData, 0)
 	xAxis := make([]string, 0)
@@ -180,5 +190,5 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 		}
 		lastMonthConnectionsDatas = append(lastMonthConnectionsDatas, ConnectionData{name: v.Name + " " + v.Region, data: data})
 	}
-	createConnectionsChart("connections_officials", allConnectionsLastMonth, lastMonthConnectionsDatas)
+	createConnectionsChart("Last month connections", allConnectionsLastMonth, lastMonthConnectionsDatas)
 }
