@@ -7,9 +7,10 @@ import (
 	"os"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
-	"go.mongodb.org/mongo-driver/mongo"
-
 	"github.com/go-echarts/go-echarts/v2/opts"
+	"github.com/go-echarts/go-echarts/v2/components"
+	"github.com/go-echarts/go-echarts/v2/types"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // generate random data for bar chart
@@ -46,9 +47,14 @@ func populateMissingConnectionsData(all []ConnectionsPerMonth, current []Connect
 func createConnectionsChart(name string, allConnections []ConnectionsPerMonth, connectionDatas []ConnectionData) {
 	// create a new line instance
 	line := charts.NewLine()
-	line.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
-		Title: name,
-	}))
+	line.SetGlobalOptions(
+		charts.WithTitleOpts(opts.Title{
+			Title: name,
+		}),
+		charts.WithTooltipOpts(opts.Tooltip{
+			Show: true,
+		}),
+	)
 
 	// Put data into instance
 	line.SetXAxis(getXaxis(allConnections))
@@ -65,19 +71,26 @@ func createConnectionsChart(name string, allConnections []ConnectionsPerMonth, c
 		Selected: selected,
 		Show:     opts.Bool(false),
 	}))
+	page := components.NewPage()
+	page.AddCharts(line)
 	f, _ := os.Create("public/" + name + ".html")
-	line.Render(f)
+	page.Render(f)
 }
 
 func createTop10KillerChart(chartName string, topKiller []TopKiller) {
 	// create a new bar instance
 	bar := charts.NewBar()
-	bar.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
-		Title: chartName,
-	}))
-	bar.SetGlobalOptions(charts.WithLegendOpts(opts.Legend{
-		Show: opts.Bool(false),
-	}))
+	bar.SetGlobalOptions(
+		charts.WithTitleOpts(opts.Title{
+			Title: chartName,
+		}),
+		charts.WithTooltipOpts(opts.Tooltip{
+			Show: true,
+		}),
+		charts.WithLegendOpts(opts.Legend{
+			Show: opts.Bool(false),
+		}),
+	)
 
 	items := make([]opts.BarData, 0)
 	xAxis := make([]string, 0)
@@ -87,22 +100,29 @@ func createTop10KillerChart(chartName string, topKiller []TopKiller) {
 	}
 	bar.SetXAxis(xAxis)
 	bar.AddSeries("Kills", items)
+	page := components.NewPage()
+	page.AddCharts(bar)
 	// Where the magic happens
 	f, error := os.Create("public/" + chartName + ".html")
 	if error != nil {
 		panic(error)
 	}
-	bar.Render(f)
+	page.Render(f)
 }
 
 func createCountPerServerCharts(db *mongo.Database, mongoCtx context.Context, serverList []Server, collectionName string, chartName string) {
 	bar := charts.NewBar()
-	bar.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
-		Title: chartName,
-	}))
-	bar.SetGlobalOptions(charts.WithLegendOpts(opts.Legend{
-		Show: opts.Bool(false),
-	}))
+	bar.SetGlobalOptions(
+		charts.WithTitleOpts(opts.Title{
+			Title: chartName,
+		}),
+		charts.WithTooltipOpts(opts.Tooltip{
+			Show: true,
+		}),
+		charts.WithLegendOpts(opts.Legend{
+			Show: opts.Bool(false),
+		}),
+	)
 	items := make([]opts.BarData, 0)
 	xAxis := make([]string, 0)
 	for i := 0; i < len(serverList); i++ {
@@ -114,21 +134,28 @@ func createCountPerServerCharts(db *mongo.Database, mongoCtx context.Context, se
 	}
 	bar.SetXAxis(xAxis)
 	bar.AddSeries(collectionName, items)
+	page := components.NewPage()
+	page.AddCharts(bar)
 	f, error := os.Create("public/" + chartName + ".html")
 	if error != nil {
 		panic(error)
 	}
-	bar.Render(f)
+	page.Render(f)
 }
 
 func createPlayTimePerServer(db *mongo.Database, mongoCtx context.Context, serverList []Server) {
 	bar := charts.NewBar()
-	bar.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
-		Title: "PlayTime per server this wipe",
-	}))
-	bar.SetGlobalOptions(charts.WithLegendOpts(opts.Legend{
-		Show: opts.Bool(false),
-	}))
+	bar.SetGlobalOptions(
+		charts.WithTitleOpts(opts.Title{
+			Title: "PlayTime per server this wipe",
+		}),
+		charts.WithTooltipOpts(opts.Tooltip{
+			Show: true,
+		}),
+		charts.WithLegendOpts(opts.Legend{
+			Show: opts.Bool(false),
+		}),
+	)
 	items := make([]opts.BarData, 0)
 	xAxis := make([]string, 0)
 	total := 0
@@ -142,11 +169,13 @@ func createPlayTimePerServer(db *mongo.Database, mongoCtx context.Context, serve
 	}
 	bar.SetXAxis(xAxis)
 	bar.AddSeries("Cumulative time in hours", items)
+	page := components.NewPage()
+	page.AddCharts(bar)
 	f, error := os.Create("public/" + "playtime" + ".html")
 	if error != nil {
 		panic(error)
 	}
-	bar.Render(f)
+	page.Render(f)
 }
 
 func genCharts(db *mongo.Database, mongoCtx context.Context) {
