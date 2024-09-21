@@ -101,10 +101,20 @@ footer {
 }
 
 iframe {
-  height: 400px;
+  height: 300px;
 }
 
 nav ul {
   display: flex;
   align-items: center;
+}
+
+.chart-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.chart-container iframe {
+  flex: 1 1 45%;
+  margin: 10px;
 }
