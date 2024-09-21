@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"io"
 	"os"
+	"time"
 )
 
 func copyFile(src, dst string) error {
@@ -37,7 +38,11 @@ func copyFile(src, dst string) error {
 }
 
 func genHtml() {
-	data := struct{}{}
+	data := struct {
+		GenerationTime string
+	}{
+		GenerationTime: time.Now().Format(time.RFC3339),
+	}
 
 	tmpl, err := os.ReadFile("./template.html")
 	if err != nil {
