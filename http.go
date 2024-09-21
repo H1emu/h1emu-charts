@@ -17,6 +17,8 @@ func serveHtml() {
 	fs := http.FileServer(http.Dir("public"))
 
 	http.Handle("/", fs)
+	http.Handle("/styles.css", http.FileServer(http.Dir("public")))
+
 	server_addr := os.Getenv("SERVER_ADDR")
 	if server_addr == "" {
 		println("Use SERVER_DEFAULT_ADDR")

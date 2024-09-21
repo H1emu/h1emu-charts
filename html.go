@@ -2,8 +2,39 @@ package main
 
 import (
 	"html/template"
+	"io"
 	"os"
 )
+
+func copyFile(src, dst string) error {
+	// Open the source file for reading
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer sourceFile.Close()
+
+	// Create the destination file
+	destinationFile, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer destinationFile.Close()
+
+	// Use io.Copy to copy the contents from source to destination
+	_, err = io.Copy(destinationFile, sourceFile)
+	if err != nil {
+		return err
+	}
+
+	// Flush file to disk
+	err = destinationFile.Sync()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func genHtml() {
 	data := struct {
@@ -32,6 +63,9 @@ func genHtml() {
 	if err != nil {
 		panic(err)
 	}
+
+	// add css
+	copyFile("./styles.css", "./public/styles.css")
 
 	// Confirm successful file generation
 	println("Static HTML file generated successfully.")

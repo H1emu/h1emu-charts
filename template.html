@@ -4,74 +4,49 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>H1emu Charts</title>
-    <style>
-      body {
-        text-align: center;
-      }
-    </style>
+    <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
-    <iframe
-      src="./Last month connections.html"
-      width="100%"
-      height="600px"
-      frameborder="0"
-    >
-      Your browser does not support iframes.
-    </iframe>
+  <body class="body-class">
+    <header>
+      <div class="container">
+        <div id="branding">
+          <h1>H1emu Charts</h1>
+        </div>
+        <nav>
+          <ul>
+            <li>
+              <a href="./Last month connections.html">Last Month Connections</a>
+            </li>
+            <li><a href="./connections.html">All Connections</a></li>
+            <li><a href="./playtime.html">Playtime</a></li>
+            <li><a href="./Crops per server.html">Crops per Server</a></li>
+            <li>
+              <a href="./Constructions per server.html"
+                >Constructions per Server</a
+              >
+            </li>
+            <li>
+              <a href="./Characters per server.html">Characters per Server</a>
+            </li>
+            <li>
+              <a href="./Top Killer Main EU 1.html">Top Killer Main EU 1</a>
+            </li>
+            <li>
+              <a href="./Top Killer Main US 1.html">Top Killer Main US 1</a>
+            </li>
+            <li>
+              <a href="./Top Zombie Killer Help.html">Top Zombie Killer Help</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
 
-    <a href="./connections.html">See all connections</a>
-    <iframe src="./playtime.html" width="100%" height="600px" frameborder="0">
-      Your browser does not support iframes.
-    </iframe>
-    <iframe
-      src="./Crops per server.html"
-      width="100%"
-      height="600px"
-      frameborder="0"
-    >
-      Your browser does not support iframes.
-    </iframe>
-    <iframe
-      src="./Constructions per server.html"
-      width="100%"
-      height="600px"
-      frameborder="0"
-    >
-      Your browser does not support iframes.
-    </iframe>
-    <iframe
-      src="./Characters per server.html"
-      width="100%"
-      height="600px"
-      frameborder="0"
-    >
-      Your browser does not support iframes.
-    </iframe>
-    <iframe
-      src="./Top Killer Main EU 1.html"
-      width="100%"
-      height="600px"
-      frameborder="0"
-    >
-      Your browser does not support iframes.
-    </iframe>
-    <iframe
-      src="./Top Killer Main US 1.html"
-      width="100%"
-      height="600px"
-      frameborder="0"
-    >
-      Your browser does not support iframes.
-    </iframe>
-    <iframe
-      src="./Top Zombie Killer Help.html"
-      width="100%"
-      height="600px"
-      frameborder="0"
-    >
-      Your browser does not support iframes.
-    </iframe>
+    <div class="container">
+      <div class="chart-container">
+        <p>Welcome to H1emu Charts. Please select a chart from the menu above.</p>
+      </div>
+    </div>
 
     <script>
       setTimeout(()=>location.reload(),{{.RefreshTimeMs}})
