@@ -118,3 +118,30 @@ nav ul {
   flex: 1 1 45%;
   margin: 10px;
 }
+
+/* Pd70e */
+iframe {
+  height: 200px;
+}
+
+/* Pe196 */
+nav ul {
+  display: flex;
+  align-items: center;
+}
+
+/* Peedb */
+.chart-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.chart-container iframe {
+  flex: 1 1 45%;
+  margin: 10px;
+}
+
+/* P3e7e */
+iframe {
+  height: 400px;
+}
