@@ -99,3 +99,12 @@ footer {
   margin: 20px 0;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+
+iframe {
+  height: 400px;
+}
+
+nav ul {
+  display: flex;
+  align-items: center;
+}
