@@ -37,11 +37,7 @@ func copyFile(src, dst string) error {
 }
 
 func genHtml() {
-	data := struct {
-		RefreshTimeMs uint32
-	}{
-		RefreshTimeMs: REFRESH_TIME*1000 + 60000,
-	}
+	data := struct{}{}
 
 	tmpl, err := os.ReadFile("./template.html")
 	if err != nil {
