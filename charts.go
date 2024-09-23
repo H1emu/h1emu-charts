@@ -63,7 +63,7 @@ func createConnectionsChart(name string, allConnections []ConnectionsPerMonth, c
 	}
 	line.SetGlobalOptions(charts.WithLegendOpts(opts.Legend{
 		Selected: selected,
-		Show:     opts.Bool(false),
+		// Show:     opts.Bool(false),
 	}))
 	f, _ := os.Create("public/" + name + ".html")
 	line.Render(f)
@@ -173,7 +173,7 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 	createTop10KillerChart("Top Zombie Killer Help", top)
 	connectionsDatas := make([]ConnectionData, 0)
 	allConnections := getAllConnections(db, mongoCtx)
-	for _, v := range enabledServers {
+	for _, v := range officialServers {
 		data := getConnectionsToServer(db, mongoCtx, v.ServerId)
 		if len(data) == 0 {
 			continue

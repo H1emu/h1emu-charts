@@ -114,6 +114,9 @@ func getAllConnectionsLastMonthPipeline() mongo.Pipeline {
 
 func getAllConnectionsPipeline() mongo.Pipeline {
 	pipeline := mongo.Pipeline{
+		// {{"$match", bson.D{
+		// 	{"_id", bson.D{{"$gte", primitive.NewObjectIDFromTimestamp(time.Date(2023, 2, 01, 0, 0, 0, 0, time.UTC))}}},
+		// }}},
 		{{"$addFields", bson.D{{"creationDate", bson.D{{"$toDate", "$_id"}}}}}},
 		{{"$addFields", bson.D{{"yearMonth", bson.D{{"$dateToString", bson.D{
 			{"format", "%Y-%m"},
