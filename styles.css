@@ -9,7 +9,7 @@ nav a {
   display: block;
   color: #f2f2f2;
   text-align: center;
-  padding: 14px 16px;
+  padding: 10px 12px;
   text-decoration: none;
   font-size: 17px;
 }
@@ -20,7 +20,7 @@ nav a:hover {
 }
 
 nav a.active {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
 }
 
@@ -76,7 +76,8 @@ header nav {
   margin-top: 10px;
 }
 
-header .highlight, header .current a {
+header .highlight,
+header .current a {
   color: #e8491d;
   font-weight: bold;
 }
@@ -148,7 +149,7 @@ iframe {
 
 /* Pa737 */
 body {
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   background-color: #f4f4f4;
   margin: 0;
   padding: 0;
@@ -172,7 +173,7 @@ header a {
   color: #fff;
   text-decoration: none;
   text-transform: uppercase;
-  font-size: 16px;
+  font-size: 15px;
 }
 
 header ul {
@@ -198,7 +199,8 @@ header nav {
   margin-top: 10px;
 }
 
-header .highlight, header .current a {
+header .highlight,
+header .current a {
   color: #e8491d;
   font-weight: bold;
 }
