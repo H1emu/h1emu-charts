@@ -112,6 +112,44 @@ func getAllConnectionsLastMonthPipeline() mongo.Pipeline {
 	return pipeline
 }
 
+func getKillsPerServerPipeline(serverId uint32) mongo.Pipeline {
+	// TODO: could be great if we could merge getAllKillsPipeline in it
+	pipeline := mongo.Pipeline{
+		{{"$match", bson.D{{"serverId", serverId}}}},
+		{{"$match", bson.D{{"type", "player"}}}},
+		{{"$addFields", bson.D{{"creationDate", bson.D{{"$toDate", "$_id"}}}}}},
+		{{"$addFields", bson.D{{"day", bson.D{{"$dateToString", bson.D{
+			{"format", "%Y-%m-%d"},
+			{"date", "$creationDate"},
+		}}}}}}},
+		{{"$group", bson.D{
+			{"_id", "$day"},
+			{"count", bson.D{{"$sum", 1}}},
+		}}},
+		{{"$sort", bson.D{{"_id", 1}}}},
+	}
+
+	return pipeline
+}
+
+func getAllKillsPipeline() mongo.Pipeline {
+	pipeline := mongo.Pipeline{
+		{{"$match", bson.D{{"type", "player"}}}},
+		{{"$addFields", bson.D{{"creationDate", bson.D{{"$toDate", "$_id"}}}}}},
+		{{"$addFields", bson.D{{"day", bson.D{{"$dateToString", bson.D{
+			{"format", "%Y-%m-%d"},
+			{"date", "$creationDate"},
+		}}}}}}},
+		{{"$group", bson.D{
+			{"_id", "$day"},
+			{"count", bson.D{{"$sum", 1}}},
+		}}},
+		{{"$sort", bson.D{{"_id", 1}}}},
+	}
+
+	return pipeline
+}
+
 func getAllConnectionsPipeline() mongo.Pipeline {
 	pipeline := mongo.Pipeline{
 		// {{"$match", bson.D{

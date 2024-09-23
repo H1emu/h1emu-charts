@@ -91,50 +91,75 @@ func getCharacters(db *mongo.Database, mongoCtx context.Context, serverId uint32
 	return results
 }
 
-func getConnectionsToServer(db *mongo.Database, mongoCtx context.Context, serverId uint32) []ConnectionsPerMonth {
+func getConnectionsToServer(db *mongo.Database, mongoCtx context.Context, serverId uint32) []CountPerTime {
 	ConnectionsCollection := db.Collection(CONNECTIONS_COLLECTION_NAME)
 	pipeline := getConnectionsPerServerPipeline(serverId)
 	cursor, error := ConnectionsCollection.Aggregate(mongoCtx, pipeline)
 	if error != nil {
 		panic(error)
 	}
-	var results []ConnectionsPerMonth
+	var results []CountPerTime
 	cursor.All(mongoCtx, &results)
 	return results
 }
 
-func getConnectionsLastMonthToServer(db *mongo.Database, mongoCtx context.Context, serverId uint32) []ConnectionsPerMonth {
+func getConnectionsLastMonthToServer(db *mongo.Database, mongoCtx context.Context, serverId uint32) []CountPerTime {
 	ConnectionsCollection := db.Collection(CONNECTIONS_COLLECTION_NAME)
 	pipeline := getConnectionsLastMonthPerServerPipeline(serverId)
 	cursor, error := ConnectionsCollection.Aggregate(mongoCtx, pipeline)
 	if error != nil {
 		panic(error)
 	}
-	var results []ConnectionsPerMonth
+	var results []CountPerTime
 	cursor.All(mongoCtx, &results)
 	return results
 }
 
-func getAllConnections(db *mongo.Database, mongoCtx context.Context) []ConnectionsPerMonth {
+func getKillsToServer(db *mongo.Database, mongoCtx context.Context, serverId uint32) []CountPerTime {
+	ConnectionsCollection := db.Collection(KILLS_COLLECTION_NAME)
+	pipeline := getKillsPerServerPipeline(serverId)
+	cursor, error := ConnectionsCollection.Aggregate(mongoCtx, pipeline)
+	if error != nil {
+		panic(error)
+	}
+	var results []CountPerTime
+	cursor.All(mongoCtx, &results)
+	return results
+}
+
+func getAllKills(db *mongo.Database, mongoCtx context.Context) []CountPerTime {
+	ConnectionsCollection := db.Collection(KILLS_COLLECTION_NAME)
+	// TODO: change this to only get players kills
+	pipeline := getAllKillsPipeline()
+	cursor, error := ConnectionsCollection.Aggregate(mongoCtx, pipeline)
+	if error != nil {
+		panic(error)
+	}
+	var results []CountPerTime
+	cursor.All(mongoCtx, &results)
+	return results
+}
+
+func getAllConnections(db *mongo.Database, mongoCtx context.Context) []CountPerTime {
 	ConnectionsCollection := db.Collection(CONNECTIONS_COLLECTION_NAME)
 	pipeline := getAllConnectionsPipeline()
 	cursor, error := ConnectionsCollection.Aggregate(mongoCtx, pipeline)
 	if error != nil {
 		panic(error)
 	}
-	var results []ConnectionsPerMonth
+	var results []CountPerTime
 	cursor.All(mongoCtx, &results)
 	return results
 }
 
-func getAllConnectionsLastMonth(db *mongo.Database, mongoCtx context.Context) []ConnectionsPerMonth {
+func getAllConnectionsLastMonth(db *mongo.Database, mongoCtx context.Context) []CountPerTime {
 	ConnectionsCollection := db.Collection(CONNECTIONS_COLLECTION_NAME)
 	pipeline := getAllConnectionsLastMonthPipeline()
 	cursor, error := ConnectionsCollection.Aggregate(mongoCtx, pipeline)
 	if error != nil {
 		panic(error)
 	}
-	var results []ConnectionsPerMonth
+	var results []CountPerTime
 	cursor.All(mongoCtx, &results)
 	return results
 }

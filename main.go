@@ -5,11 +5,6 @@ import (
 	"time"
 )
 
-type ConnectionData struct {
-	name string
-	data []ConnectionsPerMonth
-}
-
 const REFRESH_TIME = 600
 
 func main() {

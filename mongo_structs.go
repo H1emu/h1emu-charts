@@ -4,6 +4,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type CountData struct {
+	name string
+	data []CountPerTime
+}
 type CountPerServerResult struct {
 	Count uint32 `bson:"count"`
 }
@@ -11,7 +15,7 @@ type CountPerServerResult struct {
 type Kills struct {
 	ServerId uint32 `bson:"serverId" json:"serverId"`
 }
-type ConnectionsPerMonth struct {
+type CountPerTime struct {
 	Id    string `bson:"_id" json:"_id"`
 	Count uint32 `bson:"count" json:"count"`
 }

@@ -13,7 +13,7 @@ import (
 )
 
 // generate random data for bar chart
-func generateLineItems(data []ConnectionsPerMonth) []opts.LineData {
+func generateLineItems(data []CountPerTime) []opts.LineData {
 	items := make([]opts.LineData, 0)
 	for i := 0; i < len(data); i++ {
 		items = append(items, opts.LineData{Value: data[i].Count})
@@ -21,7 +21,7 @@ func generateLineItems(data []ConnectionsPerMonth) []opts.LineData {
 	return items
 }
 
-func getXaxis(ConnectionDatas []ConnectionsPerMonth) []string {
+func getXaxis(ConnectionDatas []CountPerTime) []string {
 	xais := make([]string, 0)
 	for _, v := range ConnectionDatas {
 		xais = append(xais, v.Id)
@@ -30,8 +30,8 @@ func getXaxis(ConnectionDatas []ConnectionsPerMonth) []string {
 }
 
 // Since servers were not all created a the same time
-func populateMissingConnectionsData(all []ConnectionsPerMonth, current []ConnectionsPerMonth) []ConnectionsPerMonth {
-	result := make([]ConnectionsPerMonth, len(all))
+func populateMissingConnectionsData(all []CountPerTime, current []CountPerTime) []CountPerTime {
+	result := make([]CountPerTime, len(all))
 	for i := 0; i < len(result); i++ {
 		for ry := 0; ry < len(current); ry++ {
 			if current[ry].Id == all[i].Id {
@@ -43,7 +43,7 @@ func populateMissingConnectionsData(all []ConnectionsPerMonth, current []Connect
 	return result
 }
 
-func createConnectionsChart(name string, allConnections []ConnectionsPerMonth, connectionDatas []ConnectionData) {
+func createLineCountChart(name string, allConnections []CountPerTime, connectionDatas []CountData) {
 	// create a new line instance
 	line := charts.NewLine()
 	line.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
@@ -171,24 +171,40 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 	createTop10KillerChart("Top Killer Main US 1", top)
 	top = getTopKiller(db, mongoCtx, 61, "zombie")
 	createTop10KillerChart("Top Zombie Killer Help", top)
-	connectionsDatas := make([]ConnectionData, 0)
+	allKills := getAllKills(db, mongoCtx)
+
+	killsDatas := make([]CountData, 0)
+	for _, v := range officialServers {
+		// TODO: shitty it's to avoid help server but it should ignore pve servers in general
+		if v.ServerId == 61 {
+			continue
+		}
+		data := getKillsToServer(db, mongoCtx, v.ServerId)
+		if len(data) == 0 {
+			continue
+		}
+		killsDatas = append(killsDatas, CountData{name: v.Name + " " + v.Region, data: data})
+	}
+	createLineCountChart("Kill activity", allKills, killsDatas)
+
+	connectionsDatas := make([]CountData, 0)
 	allConnections := getAllConnections(db, mongoCtx)
 	for _, v := range officialServers {
 		data := getConnectionsToServer(db, mongoCtx, v.ServerId)
 		if len(data) == 0 {
 			continue
 		}
-		connectionsDatas = append(connectionsDatas, ConnectionData{name: v.Name + " " + v.Region, data: data})
+		connectionsDatas = append(connectionsDatas, CountData{name: v.Name + " " + v.Region, data: data})
 	}
-	createConnectionsChart("connections", allConnections, connectionsDatas)
-	lastMonthConnectionsDatas := make([]ConnectionData, 0)
+	createLineCountChart("connections", allConnections, connectionsDatas)
+	lastMonthConnectionsDatas := make([]CountData, 0)
 	allConnectionsLastMonth := getAllConnectionsLastMonth(db, mongoCtx)
 	for _, v := range officialServers {
 		data := getConnectionsLastMonthToServer(db, mongoCtx, v.ServerId)
 		if len(data) == 0 {
 			continue
 		}
-		lastMonthConnectionsDatas = append(lastMonthConnectionsDatas, ConnectionData{name: v.Name + " " + v.Region, data: data})
+		lastMonthConnectionsDatas = append(lastMonthConnectionsDatas, CountData{name: v.Name + " " + v.Region, data: data})
 	}
-	createConnectionsChart("Last month connections", allConnectionsLastMonth, lastMonthConnectionsDatas)
+	createLineCountChart("Last month connections", allConnectionsLastMonth, lastMonthConnectionsDatas)
 }
