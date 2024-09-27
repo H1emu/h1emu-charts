@@ -131,8 +131,8 @@ func createPlayTimePerServer(db *mongo.Database, mongoCtx context.Context, serve
 	}))
 	items := make([]opts.BarData, 0)
 	xAxis := make([]string, 0)
-	total := 0
 	for _, v := range serverList {
+		total := 0
 		chars := getCharacters(db, mongoCtx, v.ServerId)
 		xAxis = append(xAxis, fmt.Sprintf("%s (%s)", v.Name, v.Region))
 		for _, v := range chars {
