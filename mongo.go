@@ -38,7 +38,7 @@ func getDb(mongoCtx context.Context) *mongo.Database {
 	return mongoClient.Database(DATABASE_NAME)
 }
 
-func getTopKiller(db *mongo.Database, mongoCtx context.Context, serverId uint32, entityType string) []TopKiller {
+func getTopKiller(db *mongo.Database, mongoCtx context.Context, serverId uint32, entityType string) []Top {
 	coll := db.Collection(KILLS_COLLECTION_NAME)
 	pipeline := getTopKillerPipeline(serverId, entityType, 10)
 	cursor, error := coll.Aggregate(mongoCtx, pipeline)
@@ -47,7 +47,21 @@ func getTopKiller(db *mongo.Database, mongoCtx context.Context, serverId uint32,
 		panic(error)
 	}
 	defer cursor.Close(mongoCtx)
-	var result []TopKiller
+	var result []Top
+	cursor.All(mongoCtx, &result)
+	return result
+}
+
+func getTopPlayTime(db *mongo.Database, mongoCtx context.Context, serverId uint32) []Top {
+	coll := db.Collection(CHARACTERS_COLLECTION_NAME)
+	pipeline := getTopPlaytimePipeline(serverId, 10)
+	cursor, error := coll.Aggregate(mongoCtx, pipeline)
+
+	if error != nil {
+		panic(error)
+	}
+	defer cursor.Close(mongoCtx)
+	var result []Top
 	cursor.All(mongoCtx, &result)
 	return result
 }

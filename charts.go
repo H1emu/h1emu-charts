@@ -69,7 +69,7 @@ func createLineCountChart(name string, allConnections []CountPerTime, connection
 	line.Render(f)
 }
 
-func createTop10KillerChart(chartName string, topKiller []TopKiller) {
+func createTop10Chart(chartName string, topKiller []Top, elementType string, elementModifier float32) {
 	// create a new bar instance
 	bar := charts.NewBar()
 	bar.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
@@ -83,10 +83,10 @@ func createTop10KillerChart(chartName string, topKiller []TopKiller) {
 	xAxis := make([]string, 0)
 	for _, killer := range topKiller {
 		xAxis = append(xAxis, killer.CharacterName)
-		items = append(items, opts.BarData{Value: killer.Count})
+		items = append(items, opts.BarData{Value: uint32(float32(killer.Count) * elementModifier)})
 	}
 	bar.SetXAxis(xAxis)
-	bar.AddSeries("Kills", items)
+	bar.AddSeries(elementType, items)
 	// Where the magic happens
 	f, error := os.Create("public/" + chartName + ".html")
 	if error != nil {
@@ -165,12 +165,16 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 	createCountPerServerCharts(db, mongoCtx, officialServers, CHARACTERS_COLLECTION_NAME, "Characters per server")
 	createCountPerServerCharts(db, mongoCtx, officialServers, CONSTRUCTIONS_COLLECTION_NAME, "Constructions per server")
 	createCountPerServerCharts(db, mongoCtx, officialServers, CROPS_COLLECTION_NAME, "Crops per server")
-	top := getTopKiller(db, mongoCtx, 12, "player")
-	createTop10KillerChart("Top Killer Main EU 1", top)
+	top := getTopPlayTime(db, mongoCtx, 12)
+	createTop10Chart("Top PlayTime Main EU 1", top, "Hours", 1.0/60.0)
+	top = getTopPlayTime(db, mongoCtx, 11)
+	createTop10Chart("Top PlayTime Main US 1", top, "Hours", 1.0/60.0)
+	top = getTopKiller(db, mongoCtx, 12, "player")
+	createTop10Chart("Top Killer Main EU 1", top, "Kills", 1)
 	top = getTopKiller(db, mongoCtx, 11, "player")
-	createTop10KillerChart("Top Killer Main US 1", top)
+	createTop10Chart("Top Killer Main US 1", top, "Kills", 1)
 	top = getTopKiller(db, mongoCtx, 61, "zombie")
-	createTop10KillerChart("Top Zombie Killer Help", top)
+	createTop10Chart("Top Zombie Killer Help", top, "Kills", 1)
 	allKills := getAllKills(db, mongoCtx)
 
 	killsDatas := make([]CountData, 0)

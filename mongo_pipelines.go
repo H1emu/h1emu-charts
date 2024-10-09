@@ -36,6 +36,21 @@ func getTopKillerPipeline(serverId uint32, entityType string, maxResult uint8) m
 	return pipeline
 }
 
+func getTopPlaytimePipeline(serverId uint32, maxResult uint8) mongo.Pipeline {
+	pipeline := mongo.Pipeline{
+		{{"$match", bson.D{{"serverId", serverId}}}},
+		{{"$sort", bson.D{{"playTime", -1}}}}, // Sort by playtime in descending order
+		{{"$limit", maxResult}},               // Limit the results to maxResult
+		{{"$project", bson.D{
+			{"_id", 0},                          // Exclude the _id field from the output
+			{"characterName", "$characterName"}, // Include the characterName field
+			{"count", "$playTime"},              // Include the playtime field
+		}}},
+	}
+
+	return pipeline
+}
+
 func getConnectionsLastMonthPerServerPipeline(serverId uint32) mongo.Pipeline {
 	now := time.Now()
 	firstOfThisMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)

@@ -20,7 +20,7 @@ type CountPerTime struct {
 	Count uint32 `bson:"count" json:"count"`
 }
 
-type TopKiller struct {
+type Top struct {
 	CharacterName string `bson:"characterName"`
 	Count         uint32 `bson:"count"`
 }
