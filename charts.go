@@ -203,7 +203,7 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 		if len(data) == 0 {
 			continue
 		}
-		zombieKillsDatas = append(killsDatas, CountData{name: v.Name + " " + v.Region, data: data})
+		zombieKillsDatas = append(zombieKillsDatas, CountData{name: v.Name + " " + v.Region, data: data})
 	}
 	createLineCountChart("Zombie kill activity", allZombieKills, zombieKillsDatas)
 
