@@ -129,9 +129,9 @@ func getConnectionsLastMonthToServer(db *mongo.Database, mongoCtx context.Contex
 	return results
 }
 
-func getKillsToServer(db *mongo.Database, mongoCtx context.Context, serverId uint32) []CountPerTime {
+func getKillsToServer(db *mongo.Database, mongoCtx context.Context, serverId uint32, entityType string) []CountPerTime {
 	ConnectionsCollection := db.Collection(KILLS_COLLECTION_NAME)
-	pipeline := getKillsPerServerPipeline(serverId)
+	pipeline := getKillsPerServerPipeline(serverId, entityType)
 	cursor, error := ConnectionsCollection.Aggregate(mongoCtx, pipeline)
 	if error != nil {
 		panic(error)
@@ -141,10 +141,9 @@ func getKillsToServer(db *mongo.Database, mongoCtx context.Context, serverId uin
 	return results
 }
 
-func getAllKills(db *mongo.Database, mongoCtx context.Context) []CountPerTime {
+func getAllKills(db *mongo.Database, mongoCtx context.Context, entitytype string) []CountPerTime {
 	ConnectionsCollection := db.Collection(KILLS_COLLECTION_NAME)
-	// TODO: change this to only get players kills
-	pipeline := getAllKillsPipeline()
+	pipeline := getAllKillsPipeline(entitytype)
 	cursor, error := ConnectionsCollection.Aggregate(mongoCtx, pipeline)
 	if error != nil {
 		panic(error)

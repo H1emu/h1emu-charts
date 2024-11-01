@@ -179,7 +179,7 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 	createTop10Chart("Top Zombie Killer Main US 1", top, "Kills", 1)
 	top = getTopKiller(db, mongoCtx, 61, "zombie")
 	createTop10Chart("Top Zombie Killer Help", top, "Kills", 1)
-	allKills := getAllKills(db, mongoCtx)
+	allKills := getAllKills(db, mongoCtx, "player")
 
 	killsDatas := make([]CountData, 0)
 	for _, v := range officialServers {
@@ -187,13 +187,25 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 		if v.ServerId == 61 {
 			continue
 		}
-		data := getKillsToServer(db, mongoCtx, v.ServerId)
+		data := getKillsToServer(db, mongoCtx, v.ServerId, "player")
 		if len(data) == 0 {
 			continue
 		}
 		killsDatas = append(killsDatas, CountData{name: v.Name + " " + v.Region, data: data})
 	}
-	createLineCountChart("Kill activity", allKills, killsDatas)
+	createLineCountChart("Player kill activity", allKills, killsDatas)
+
+	allZombieKills := getAllKills(db, mongoCtx, "zombie")
+
+	zombieKillsDatas := make([]CountData, 0)
+	for _, v := range officialServers {
+		data := getKillsToServer(db, mongoCtx, v.ServerId, "zombie")
+		if len(data) == 0 {
+			continue
+		}
+		zombieKillsDatas = append(killsDatas, CountData{name: v.Name + " " + v.Region, data: data})
+	}
+	createLineCountChart("Zombie kill activity", allZombieKills, zombieKillsDatas)
 
 	connectionsDatas := make([]CountData, 0)
 	allConnections := getAllConnections(db, mongoCtx)

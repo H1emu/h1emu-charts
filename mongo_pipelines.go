@@ -127,11 +127,10 @@ func getAllConnectionsLastMonthPipeline() mongo.Pipeline {
 	return pipeline
 }
 
-func getKillsPerServerPipeline(serverId uint32) mongo.Pipeline {
-	// TODO: could be great if we could merge getAllKillsPipeline in it
+func getKillsPerServerPipeline(serverId uint32, entityType string) mongo.Pipeline {
 	pipeline := mongo.Pipeline{
 		{{"$match", bson.D{{"serverId", serverId}}}},
-		{{"$match", bson.D{{"type", "player"}}}},
+		{{"$match", bson.D{{"type", entityType}}}},
 		{{"$addFields", bson.D{{"creationDate", bson.D{{"$toDate", "$_id"}}}}}},
 		{{"$addFields", bson.D{{"day", bson.D{{"$dateToString", bson.D{
 			{"format", "%Y-%m-%d"},
@@ -147,9 +146,9 @@ func getKillsPerServerPipeline(serverId uint32) mongo.Pipeline {
 	return pipeline
 }
 
-func getAllKillsPipeline() mongo.Pipeline {
+func getAllKillsPipeline(entityType string) mongo.Pipeline {
 	pipeline := mongo.Pipeline{
-		{{"$match", bson.D{{"type", "player"}}}},
+		{{"$match", bson.D{{"type", entityType}}}},
 		{{"$addFields", bson.D{{"creationDate", bson.D{{"$toDate", "$_id"}}}}}},
 		{{"$addFields", bson.D{{"day", bson.D{{"$dateToString", bson.D{
 			{"format", "%Y-%m-%d"},
