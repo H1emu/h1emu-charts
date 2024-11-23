@@ -126,6 +126,33 @@ func getAllConnectionsLastMonthPipeline() mongo.Pipeline {
 	return pipeline
 }
 
+func getAllConnectionsLastYearPipeline() mongo.Pipeline {
+	now := time.Now()
+	gte := time.Date(now.Year(), 0, 0, 0, 0, 0, 0, time.UTC)
+
+	pipeline := mongo.Pipeline{
+		{{"$addFields", bson.D{{"creationDate", bson.D{{"$toDate", "$_id"}}}}}},
+		{{"$match", bson.D{
+			{"creationDate", bson.D{
+				{"$gte", gte},
+				{"$lt", now},
+			}},
+		}}},
+
+		{{"$addFields", bson.D{{"yearMonth", bson.D{{"$dateToString", bson.D{
+			{"format", "%Y-%m"},
+			{"date", "$creationDate"},
+		}}}}}}},
+		{{"$group", bson.D{
+			{"_id", "$yearMonth"},
+			{"count", bson.D{{"$sum", 1}}},
+		}}},
+		{{"$sort", bson.D{{"_id", 1}}}},
+	}
+
+	return pipeline
+}
+
 func getKillsPerServerPipeline(serverId uint32, entityType string) mongo.Pipeline {
 	pipeline := mongo.Pipeline{
 		{{"$match", bson.D{{"serverId", serverId}}}},
@@ -165,9 +192,6 @@ func getAllKillsPipeline(entityType string) mongo.Pipeline {
 
 func getAllConnectionsPipeline() mongo.Pipeline {
 	pipeline := mongo.Pipeline{
-		// {{"$match", bson.D{
-		// 	{"_id", bson.D{{"$gte", primitive.NewObjectIDFromTimestamp(time.Date(2023, 2, 01, 0, 0, 0, 0, time.UTC))}}},
-		// }}},
 		{{"$addFields", bson.D{{"creationDate", bson.D{{"$toDate", "$_id"}}}}}},
 		{{"$addFields", bson.D{{"yearMonth", bson.D{{"$dateToString", bson.D{
 			{"format", "%Y-%m"},

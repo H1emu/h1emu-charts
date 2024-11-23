@@ -165,6 +165,18 @@ func getAllConnections(db *mongo.Database, mongoCtx context.Context) []CountPerT
 	return results
 }
 
+func getAllConnectionsLastYear(db *mongo.Database, mongoCtx context.Context) []CountPerTime {
+	ConnectionsCollection := db.Collection(CONNECTIONS_COLLECTION_NAME)
+	pipeline := getAllConnectionsLastYearPipeline()
+	cursor, error := ConnectionsCollection.Aggregate(mongoCtx, pipeline)
+	if error != nil {
+		panic(error)
+	}
+	var results []CountPerTime
+	cursor.All(mongoCtx, &results)
+	return results
+}
+
 func getAllConnectionsLastMonth(db *mongo.Database, mongoCtx context.Context) []CountPerTime {
 	ConnectionsCollection := db.Collection(CONNECTIONS_COLLECTION_NAME)
 	pipeline := getAllConnectionsLastMonthPipeline()

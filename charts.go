@@ -208,7 +208,7 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 	createLineCountChart("Zombie kill activity", allZombieKills, zombieKillsDatas)
 
 	connectionsDatas := make([]CountData, 0)
-	allConnections := getAllConnections(db, mongoCtx)
+	allConnectionsLastYear := getAllConnectionsLastYear(db, mongoCtx)
 	for _, v := range officialServers {
 		data := getConnectionsToServer(db, mongoCtx, v.ServerId)
 		if len(data) == 0 {
@@ -216,7 +216,7 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 		}
 		connectionsDatas = append(connectionsDatas, CountData{name: v.Name + " " + v.Region, data: data})
 	}
-	createLineCountChart("connections", allConnections, connectionsDatas)
+	createLineCountChart("Last year connections", allConnectionsLastYear, connectionsDatas)
 	lastMonthConnectionsDatas := make([]CountData, 0)
 	allConnectionsLastMonth := getAllConnectionsLastMonth(db, mongoCtx)
 	for _, v := range officialServers {
