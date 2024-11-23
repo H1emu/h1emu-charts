@@ -5,8 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>H1emu Charts</title>
     <link rel="stylesheet" href="styles.css" />
+    <script>
+      function adjustToLocalTime() {
+        const serverTime = "{{.GenerationTime}}";
+        const localTime = new Date(serverTime).toLocaleString();
+        document.getElementById("gen-time").innerText =
+          "Charts generated at " + localTime;
+      }
+    </script>
   </head>
-  <body class="body-class">
+  <body class="body-class" onload="adjustToLocalTime()">
     <header>
       <div class="container">
         <div id="branding">
@@ -67,7 +75,7 @@
         <p>
           Welcome to H1emu Charts. Please select a chart from the menu above.
         </p>
-        <p>Charts generated at {{.GenerationTime}}</p>
+        <p id="gen-time"></p>
       </div>
     </div>
     <div class="container">
