@@ -102,14 +102,13 @@ func getConnectionsPerServerPipeline(serverId uint32) mongo.Pipeline {
 
 func getAllConnectionsLastMonthPipeline() mongo.Pipeline {
 	now := time.Now()
-	firstOfThisMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
-	firstOfLastMonth := firstOfThisMonth.AddDate(0, -1, 0)
+	gte := time.Date(now.Year(), now.Month()-1, now.Day(), 0, 0, 0, 0, time.UTC)
 
 	pipeline := mongo.Pipeline{
 		{{"$addFields", bson.D{{"creationDate", bson.D{{"$toDate", "$_id"}}}}}},
 		{{"$match", bson.D{
 			{"creationDate", bson.D{
-				{"$gte", firstOfLastMonth},
+				{"$gte", gte},
 				{"$lt", now},
 			}},
 		}}},
