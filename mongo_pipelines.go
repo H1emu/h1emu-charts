@@ -128,7 +128,7 @@ func getAllConnectionsLastMonthPipeline() mongo.Pipeline {
 
 func getAllConnectionsLastYearPipeline() mongo.Pipeline {
 	now := time.Now()
-	gte := time.Date(now.Year(), 0, 0, 0, 0, 0, 0, time.UTC)
+	gte := time.Date(now.Year()-1, time.January, 0, 0, 0, 0, 0, time.UTC)
 
 	pipeline := mongo.Pipeline{
 		{{"$addFields", bson.D{{"creationDate", bson.D{{"$toDate", "$_id"}}}}}},
