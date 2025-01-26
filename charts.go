@@ -63,6 +63,8 @@ func createLineCountChart(name string, allConnections []CountPerTime, connection
 	}
 	line.SetGlobalOptions(charts.WithLegendOpts(opts.Legend{
 		Selected: selected,
+		Top:      "22px",
+
 		// Show:     opts.Bool(false),
 	}))
 	f, _ := os.Create("public/" + name + ".html")
