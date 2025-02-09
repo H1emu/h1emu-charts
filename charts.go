@@ -154,13 +154,9 @@ func createPlayTimePerServer(db *mongo.Database, mongoCtx context.Context, serve
 func genCharts(db *mongo.Database, mongoCtx context.Context) {
 	servers := getServers(db, mongoCtx)
 	officialServers := []Server{}
-	enabledServers := []Server{}
 	for _, v := range servers {
-		if v.IsOfficial && !v.IsDisabled {
+		if v.IsOfficial && !v.IsDisabled && !v.HiddenCharts {
 			officialServers = append(officialServers, v)
-		}
-		if !v.IsDisabled {
-			enabledServers = append(enabledServers, v)
 		}
 	}
 	createPlayTimePerServer(db, mongoCtx, officialServers)
@@ -191,10 +187,6 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 
 	killsDatas := make([]CountData, 0)
 	for _, v := range officialServers {
-		// TODO: shitty it's to avoid help server but it should ignore pve servers in general
-		if v.ServerId == 61 {
-			continue
-		}
 		data := getKillsToServer(db, mongoCtx, v.ServerId, "player")
 		if len(data) == 0 {
 			continue
