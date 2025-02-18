@@ -102,7 +102,7 @@ func getConnectionsPerServerPipeline(serverId uint32) mongo.Pipeline {
 
 func getAllConnectionsLastMonthPipeline() mongo.Pipeline {
 	now := time.Now()
-	lt := time.Date(now.Year(), now.Month(), now.Day()-1, 0, 0, 0, 0, time.UTC)
+	lt := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	gte := time.Date(now.Year(), now.Month()-1, now.Day(), 0, 0, 0, 0, time.UTC)
 
 	pipeline := mongo.Pipeline{
@@ -129,7 +129,7 @@ func getAllConnectionsLastMonthPipeline() mongo.Pipeline {
 
 func getAllConnectionsLastYearPipeline() mongo.Pipeline {
 	now := time.Now()
-	lt := time.Date(now.Year(), now.Month()-1, 0, 0, 0, 0, 0, time.UTC)
+	lt := time.Date(now.Year(), now.Month(), 0, 0, 0, 0, 0, time.UTC)
 	gte := time.Date(now.Year()-1, time.January, 0, 0, 0, 0, 0, time.UTC)
 
 	pipeline := mongo.Pipeline{
