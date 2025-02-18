@@ -182,9 +182,16 @@ func getKillsPerServerPipeline(serverId uint32, entityType string) mongo.Pipelin
 }
 
 func getAllKillsPipeline(entityType string) mongo.Pipeline {
+	now := time.Now()
+	lt := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
 	pipeline := mongo.Pipeline{
 		{{"$match", bson.D{{"type", entityType}}}},
 		{{"$addFields", bson.D{{"creationDate", bson.D{{"$toDate", "$_id"}}}}}},
+		{{"$match", bson.D{
+			{"creationDate", bson.D{
+				{"$lt", lt},
+			}},
+		}}},
 		{{"$addFields", bson.D{{"day", bson.D{{"$dateToString", bson.D{
 			{"format", "%Y-%m-%d"},
 			{"date", "$creationDate"},
