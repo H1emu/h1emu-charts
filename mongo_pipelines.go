@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -52,26 +53,25 @@ func getTopPlaytimePipeline(serverId uint32, maxResult uint8) mongo.Pipeline {
 }
 
 func getConnectionsLastMonthPerServerPipeline(serverId uint32) mongo.Pipeline {
-	now := time.Now()
+	now := time.Now().UTC().Truncate(24 * time.Hour)
 	firstOfThisMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 	firstOfLastMonth := firstOfThisMonth.AddDate(0, -1, 0)
-	pipeline := mongo.Pipeline{
-		{{"$match", bson.D{{"serverId", serverId}}}},
-		{{"$addFields", bson.D{{"creationDate", bson.D{{"$toDate", "$_id"}}}}}},
 
+	pipeline := mongo.Pipeline{
 		{{"$match", bson.D{
-			{"creationDate", bson.D{
-				{"$gte", firstOfLastMonth},
-				{"$lt", now},
+			{"serverId", serverId},
+			{"_id", bson.D{
+				{"$gte", primitive.NewObjectIDFromTimestamp(firstOfLastMonth)},
+				{"$lt", primitive.NewObjectIDFromTimestamp(firstOfThisMonth)},
 			}},
 		}}},
-
-		{{"$addFields", bson.D{{"day", bson.D{{"$dateToString", bson.D{
-			{"format", "%Y-%m-%d"},
-			{"date", "$creationDate"},
-		}}}}}}},
 		{{"$group", bson.D{
-			{"_id", "$day"},
+			{"_id", bson.D{
+				{"$dateToString", bson.D{
+					{"format", "%Y-%m-%d"},
+					{"date", bson.D{{"$toDate", "$_id"}}},
+				}},
+			}},
 			{"count", bson.D{{"$sum", 1}}},
 		}}},
 		{{"$sort", bson.D{{"_id", 1}}}},
@@ -83,15 +83,13 @@ func getConnectionsLastMonthPerServerPipeline(serverId uint32) mongo.Pipeline {
 func getConnectionsPerServerPipeline(serverId uint32) mongo.Pipeline {
 	pipeline := mongo.Pipeline{
 		{{"$match", bson.D{{"serverId", serverId}}}},
-		{{"$addFields", bson.D{{"creationDate", bson.D{{"$toDate", "$_id"}}}}}},
-		{{"$addFields", bson.D{{"yearMonth", bson.D{
-			{"$dateToString", bson.D{
-				{"format", "%Y-%m"},
-				{"date", "$creationDate"},
-			}},
-		}}}}},
 		{{"$group", bson.D{
-			{"_id", "$yearMonth"},
+			{"_id", bson.D{
+				{"$dateToString", bson.D{
+					{"format", "%Y-%m"},
+					{"date", bson.D{{"$toDate", "$_id"}}},
+				}},
+			}},
 			{"count", bson.D{{"$sum", 1}}},
 		}}},
 		{{"$sort", bson.D{{"_id", 1}}}},
@@ -101,24 +99,24 @@ func getConnectionsPerServerPipeline(serverId uint32) mongo.Pipeline {
 }
 
 func getAllConnectionsLastMonthPipeline() mongo.Pipeline {
-	now := time.Now()
-	lt := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC)
-	gte := time.Date(now.Year(), now.Month()-1, now.Day(), 0, 0, 0, 0, time.UTC)
+	now := time.Now().UTC().Truncate(24 * time.Hour)
+	lt := now
+	gte := now.AddDate(0, -1, 0) // Move one month back
 
 	pipeline := mongo.Pipeline{
-		{{"$addFields", bson.D{{"creationDate", bson.D{{"$toDate", "$_id"}}}}}},
 		{{"$match", bson.D{
-			{"creationDate", bson.D{
-				{"$gte", gte},
-				{"$lt", lt},
+			{"_id", bson.D{
+				{"$gte", primitive.NewObjectIDFromTimestamp(gte)},
+				{"$lt", primitive.NewObjectIDFromTimestamp(lt)},
 			}},
 		}}},
-		{{"$addFields", bson.D{{"day", bson.D{{"$dateToString", bson.D{
-			{"format", "%Y-%m-%d"},
-			{"date", "$creationDate"},
-		}}}}}}},
 		{{"$group", bson.D{
-			{"_id", "$day"},
+			{"_id", bson.D{
+				{"$dateToString", bson.D{
+					{"format", "%Y-%m-%d"},
+					{"date", bson.D{{"$toDate", "$_id"}}},
+				}},
+			}},
 			{"count", bson.D{{"$sum", 1}}},
 		}}},
 		{{"$sort", bson.D{{"_id", 1}}}},
@@ -128,25 +126,24 @@ func getAllConnectionsLastMonthPipeline() mongo.Pipeline {
 }
 
 func getAllConnectionsLastYearPipeline() mongo.Pipeline {
-	now := time.Now()
-	lt := time.Date(now.Year(), now.Month(), 0, 0, 0, 0, 0, time.UTC)
-	gte := time.Date(now.Year()-1, time.January, 0, 0, 0, 0, 0, time.UTC)
+	now := time.Now().UTC().Truncate(24 * time.Hour)
+	lt := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC) // First day of the current month
+	gte := time.Date(now.Year()-1, 1, 1, 0, 0, 0, 0, time.UTC)        // First day of last year
 
 	pipeline := mongo.Pipeline{
-		{{"$addFields", bson.D{{"creationDate", bson.D{{"$toDate", "$_id"}}}}}},
 		{{"$match", bson.D{
-			{"creationDate", bson.D{
-				{"$gte", gte},
-				{"$lt", lt},
+			{"_id", bson.D{
+				{"$gte", primitive.NewObjectIDFromTimestamp(gte)},
+				{"$lt", primitive.NewObjectIDFromTimestamp(lt)},
 			}},
 		}}},
-
-		{{"$addFields", bson.D{{"yearMonth", bson.D{{"$dateToString", bson.D{
-			{"format", "%Y-%m"},
-			{"date", "$creationDate"},
-		}}}}}}},
 		{{"$group", bson.D{
-			{"_id", "$yearMonth"},
+			{"_id", bson.D{
+				{"$dateToString", bson.D{
+					{"format", "%Y-%m"},
+					{"date", bson.D{{"$toDate", "$_id"}}},
+				}},
+			}},
 			{"count", bson.D{{"$sum", 1}}},
 		}}},
 		{{"$sort", bson.D{{"_id", 1}}}},
