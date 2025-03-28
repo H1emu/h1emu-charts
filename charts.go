@@ -227,4 +227,5 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 		lastMonthConnectionsDatas = append(lastMonthConnectionsDatas, CountData{name: v.Name + " " + v.Region, data: data})
 	}
 	createLineCountChart("Last month connections", allConnectionsLastMonth, lastMonthConnectionsDatas)
+	println("Static HTML files generated successfully.")
 }

@@ -69,5 +69,5 @@ func genHtml() {
 	copyFile("./styles.css", "./public/styles.css")
 
 	// Confirm successful file generation
-	println("Static HTML file generated successfully.")
+	println("Static index file generated successfully.")
 }
