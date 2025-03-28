@@ -53,25 +53,26 @@ func getTopPlaytimePipeline(serverId uint32, maxResult uint8) mongo.Pipeline {
 }
 
 func getConnectionsLastMonthPerServerPipeline(serverId uint32) mongo.Pipeline {
-	now := time.Now().UTC().Truncate(24 * time.Hour)
+	now := time.Now()
 	firstOfThisMonth := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, time.UTC)
 	firstOfLastMonth := firstOfThisMonth.AddDate(0, -1, 0)
-
 	pipeline := mongo.Pipeline{
+		{{"$match", bson.D{{"serverId", serverId}}}},
+		{{"$addFields", bson.D{{"creationDate", bson.D{{"$toDate", "$_id"}}}}}},
+
 		{{"$match", bson.D{
-			{"serverId", serverId},
-			{"_id", bson.D{
-				{"$gte", primitive.NewObjectIDFromTimestamp(firstOfLastMonth)},
-				{"$lt", primitive.NewObjectIDFromTimestamp(firstOfThisMonth)},
+			{"creationDate", bson.D{
+				{"$gte", firstOfLastMonth},
+				{"$lt", now},
 			}},
 		}}},
+
+		{{"$addFields", bson.D{{"day", bson.D{{"$dateToString", bson.D{
+			{"format", "%Y-%m-%d"},
+			{"date", "$creationDate"},
+		}}}}}}},
 		{{"$group", bson.D{
-			{"_id", bson.D{
-				{"$dateToString", bson.D{
-					{"format", "%Y-%m-%d"},
-					{"date", bson.D{{"$toDate", "$_id"}}},
-				}},
-			}},
+			{"_id", "$day"},
 			{"count", bson.D{{"$sum", 1}}},
 		}}},
 		{{"$sort", bson.D{{"_id", 1}}}},
