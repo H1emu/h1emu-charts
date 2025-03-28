@@ -18,10 +18,10 @@ func main() {
 	go serveHtml()
 	for {
 		start := time.Now()
+		go genHtml()
 		genCharts(db, mongoCtx)
 		elapsed := time.Since(start)
 		fmt.Printf("Elapsed time: %s\n", elapsed)
-		genHtml()
 		time.Sleep(REFRESH_TIME * time.Second)
 	}
 }
