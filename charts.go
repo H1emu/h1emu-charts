@@ -109,8 +109,11 @@ func createCountPerServerCharts(db *mongo.Database, mongoCtx context.Context, se
 	xAxis := make([]string, 0)
 	for i := 0; i < len(serverList); i++ {
 		v := serverList[i]
-		xAxis = append(xAxis, fmt.Sprintf("%s (%s)", v.Name, v.Region))
 		count := getCountPerServer(db, mongoCtx, v.ServerId, collectionName)
+		if count == 0 {
+			continue
+		}
+		xAxis = append(xAxis, fmt.Sprintf("%s (%s)", v.Name, v.Region))
 		items = append(items, opts.BarData{Value: count})
 
 	}
@@ -136,10 +139,13 @@ func createPlayTimePerServer(db *mongo.Database, mongoCtx context.Context, serve
 	for _, v := range serverList {
 		total := 0
 		chars := getCharacters(db, mongoCtx, v.ServerId)
-		xAxis = append(xAxis, fmt.Sprintf("%s (%s)", v.Name, v.Region))
 		for _, v := range chars {
 			total += int(v.PlayTime)
 		}
+		if total == 0 {
+			continue
+		}
+		xAxis = append(xAxis, fmt.Sprintf("%s (%s)", v.Name, v.Region))
 		items = append(items, opts.BarData{Value: math.Floor(float64(total) / 60.0)})
 	}
 	bar.SetXAxis(xAxis)
@@ -153,16 +159,11 @@ func createPlayTimePerServer(db *mongo.Database, mongoCtx context.Context, serve
 
 func genCharts(db *mongo.Database, mongoCtx context.Context) {
 	servers := getServers(db, mongoCtx)
-	officialServers := []Server{}
-	for _, v := range servers {
-		if v.IsOfficial && !v.IsDisabled && !v.HiddenCharts {
-			officialServers = append(officialServers, v)
-		}
-	}
-	createPlayTimePerServer(db, mongoCtx, officialServers)
-	createCountPerServerCharts(db, mongoCtx, officialServers, CHARACTERS_COLLECTION_NAME, "Characters per server")
-	createCountPerServerCharts(db, mongoCtx, officialServers, CONSTRUCTIONS_COLLECTION_NAME, "Constructions per server")
-	createCountPerServerCharts(db, mongoCtx, officialServers, CROPS_COLLECTION_NAME, "Crops per server")
+
+	createPlayTimePerServer(db, mongoCtx, servers)
+	createCountPerServerCharts(db, mongoCtx, servers, CHARACTERS_COLLECTION_NAME, "Characters per server")
+	createCountPerServerCharts(db, mongoCtx, servers, CONSTRUCTIONS_COLLECTION_NAME, "Constructions per server")
+	createCountPerServerCharts(db, mongoCtx, servers, CROPS_COLLECTION_NAME, "Crops per server")
 	top := getTopPlayTime(db, mongoCtx, 12)
 	createTop10Chart("Top PlayTime Main EU 1", top, "Hours", 1.0/60.0)
 	// top = getTopPlayTime(db, mongoCtx, 37)
@@ -186,7 +187,7 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 	allKills := getAllKills(db, mongoCtx, "player")
 
 	killsDatas := make([]CountData, 0)
-	for _, v := range officialServers {
+	for _, v := range servers {
 		data := getKillsToServer(db, mongoCtx, v.ServerId, "player")
 		if len(data) == 0 {
 			continue
@@ -198,7 +199,7 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 	allZombieKills := getAllKills(db, mongoCtx, "zombie")
 
 	zombieKillsDatas := make([]CountData, 0)
-	for _, v := range officialServers {
+	for _, v := range servers {
 		data := getKillsToServer(db, mongoCtx, v.ServerId, "zombie")
 		if len(data) == 0 {
 			continue
@@ -209,7 +210,7 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 
 	connectionsDatas := make([]CountData, 0)
 	allConnectionsLastYear := getAllConnectionsLastYear(db, mongoCtx)
-	for _, v := range officialServers {
+	for _, v := range servers {
 		data := getConnectionsToServer(db, mongoCtx, v.ServerId)
 		if len(data) == 0 {
 			continue
@@ -219,7 +220,7 @@ func genCharts(db *mongo.Database, mongoCtx context.Context) {
 	createLineCountChart("Last year connections", allConnectionsLastYear, connectionsDatas)
 	lastMonthConnectionsDatas := make([]CountData, 0)
 	allConnectionsLastMonth := getAllConnectionsLastMonth(db, mongoCtx)
-	for _, v := range officialServers {
+	for _, v := range servers {
 		data := getConnectionsLastMonthToServer(db, mongoCtx, v.ServerId)
 		if len(data) == 0 {
 			continue

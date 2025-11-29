@@ -85,7 +85,7 @@ func getCountPerServer(db *mongo.Database, mongoCtx context.Context, serverId ui
 
 func getServers(db *mongo.Database, mongoCtx context.Context) []Server {
 	serversCollection := db.Collection(SERVERS_COLLECTION_NAME)
-	cursor, error := serversCollection.Find(mongoCtx, bson.M{})
+	cursor, error := serversCollection.Find(mongoCtx, bson.M{"isDisabled": false, "displayCharts": true})
 	if error != nil {
 		panic(error)
 	}

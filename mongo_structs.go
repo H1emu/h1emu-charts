@@ -40,7 +40,7 @@ type Server struct {
 	Region           string             `bson:"region" json:"region"`
 	H1emuVersion     string             `bson:"h1emuVersion" json:"h1emuVersion"`
 	GameVersion      uint32             `bson:"gameVersion" json:"gameVersion"`
-	HiddenCharts     bool               `bson:hiddenCharts json:"hiddenCharts"`
+	DisplayCharts    bool               `bson:displayCharts json:"displayCharts"`
 }
 
 type Character struct {
